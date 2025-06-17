@@ -3,6 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import { registerHandler } from './api/register.js';
 import loginHandler from './api/login.js'; // ✅ IMPORT the login handler
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
