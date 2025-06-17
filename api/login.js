@@ -17,13 +17,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Parse body manually
-    const buffers = [];
-    for await (const chunk of req) {
-      buffers.push(chunk);
-    }
-    const bodyString = Buffer.concat(buffers).toString();
-    const { email, password } = JSON.parse(bodyString);
+    const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Missing email or password' });
