@@ -3,7 +3,7 @@ import { query } from '../lib/db.js';
 import fetch from 'node-fetch';
 
 export async function registerHandler(req, res) {
-  // CORS headers (if needed globally, move to server.js)
+  // CORS headers (optional — best to handle this in server.js)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -14,11 +14,6 @@ export async function registerHandler(req, res) {
   }
 
   try {
-    const buffers = [];
-    for await (const chunk of req) {
-      buffers.push(chunk);
-    }
-    const body = Buffer.concat(buffers).toString();
     const {
       fullName,
       email,
@@ -27,7 +22,7 @@ export async function registerHandler(req, res) {
       position,
       password,
       profileImage
-    } = JSON.parse(body);
+    } = req.body;
 
     if (!fullName || !email || !password || !profileImage) {
       return res.status(400).json({ message: 'Missing required fields' });
