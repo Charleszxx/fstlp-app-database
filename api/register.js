@@ -3,7 +3,7 @@ import { query } from '../lib/db.js';
 import fetch from 'node-fetch';
 
 export async function registerHandler(req, res) {
-  // CORS headers (optional — best to handle this in server.js)
+  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -14,6 +14,10 @@ export async function registerHandler(req, res) {
   }
 
   try {
+    // Parse request body
+    const buffers = [];
+    for await (const chunk of req) buffers.push(chunk);
+    const body = Buffer.concat(buffers).toString();
     const {
       fullName,
       email,
@@ -22,15 +26,23 @@ export async function registerHandler(req, res) {
       position,
       password,
       profileImage
-    } = req.body;
+    } = JSON.parse(body);
 
     if (!fullName || !email || !password || !profileImage) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
+    // Check if email already exists
+    const check = await query(`SELECT id FROM users WHERE email = $1`, [email]);
+    if (check.rowCount > 0) {
+      return res.status(409).json({ message: 'Email already registered' });
+    }
+
+    // Convert base64 image to buffer
     const base64Data = profileImage.split(',')[1];
     const imageBuffer = Buffer.from(base64Data, 'base64');
 
+    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     // Send OTP via SMS
@@ -51,6 +63,7 @@ export async function registerHandler(req, res) {
       return res.status(500).json({ message: 'Failed to send OTP' });
     }
 
+    // Insert into database
     const result = await query(
       `INSERT INTO users (fullName, email, address, phone, position, password, profileImage)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
