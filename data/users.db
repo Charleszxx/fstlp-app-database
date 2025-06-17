@@ -1,0 +1,2 @@
+# optional: prevent committing db file
+data/*.db
