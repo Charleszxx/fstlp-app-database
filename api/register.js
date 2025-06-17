@@ -3,7 +3,6 @@ import { query } from '../lib/db.js';
 import fetch from 'node-fetch';
 
 export async function registerHandler(req, res) {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -14,19 +13,26 @@ export async function registerHandler(req, res) {
   }
 
   try {
-    // Parse request body
-    const buffers = [];
-    for await (const chunk of req) buffers.push(chunk);
-    const body = Buffer.concat(buffers).toString();
-    const {
-      fullName,
-      email,
-      address,
-      phone,
-      position,
-      password,
-      profileImage
-    } = JSON.parse(body);
+    let body = req.body;
+
+    // If req.body is empty (e.g., in serverless environments), fallback to manual parse
+    if (!body || Object.keys(body).length === 0) {
+      const buffers = [];
+      for await (const chunk of req) buffers.push(chunk);
+      const raw = Buffer.concat(buffers).toString();
+
+      if (!raw) {
+        return res.status(400).json({ message: 'Empty request body' });
+      }
+
+      try {
+        body = JSON.parse(raw);
+      } catch (e) {
+        return res.status(400).json({ message: 'Invalid JSON format' });
+      }
+    }
+
+    const { fullName, email, address, phone, position, password, profileImage } = body;
 
     if (!fullName || !email || !password || !profileImage) {
       return res.status(400).json({ message: 'Missing required fields' });
