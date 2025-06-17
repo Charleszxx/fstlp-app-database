@@ -15,7 +15,7 @@ export async function registerHandler(req, res) {
   try {
     let body = req.body;
 
-    // If req.body is empty (e.g., in serverless environments), fallback to manual parse
+    // Fallback for raw stream parsing (Render/Vercel bug workaround)
     if (!body || Object.keys(body).length === 0) {
       const buffers = [];
       for await (const chunk of req) buffers.push(chunk);
@@ -27,7 +27,7 @@ export async function registerHandler(req, res) {
 
       try {
         body = JSON.parse(raw);
-      } catch (e) {
+      } catch (err) {
         return res.status(400).json({ message: 'Invalid JSON format' });
       }
     }
@@ -37,7 +37,7 @@ export async function registerHandler(req, res) {
     if (!fullName || !email || !password || !profileImage) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
-
+    
     // Check if email already exists
     const check = await query(`SELECT id FROM users WHERE email = $1`, [email]);
     if (check.rowCount > 0) {
