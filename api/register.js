@@ -1,6 +1,7 @@
 // routes/register.js
 import { getDb } from '../lib/db.js';
 import fetch from 'node-fetch';
+import { registerHandler } from './api/register.js';
 
 export async function registerHandler(req, res) {
   if (req.method !== 'POST') {
