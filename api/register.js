@@ -1,15 +1,24 @@
 // routes/register.js
-import { getDb } from '../lib/db.js';
+import { query } from '../lib/db.js';
 import fetch from 'node-fetch';
 
 export async function registerHandler(req, res) {
+  // CORS headers (if needed globally, move to server.js)
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Only POST requests allowed' });
   }
 
-  const db = getDb();
-
   try {
+    const buffers = [];
+    for await (const chunk of req) {
+      buffers.push(chunk);
+    }
+    const body = Buffer.concat(buffers).toString();
     const {
       fullName,
       email,
@@ -18,7 +27,7 @@ export async function registerHandler(req, res) {
       position,
       password,
       profileImage
-    } = req.body;
+    } = JSON.parse(body);
 
     if (!fullName || !email || !password || !profileImage) {
       return res.status(400).json({ message: 'Missing required fields' });
@@ -29,7 +38,8 @@ export async function registerHandler(req, res) {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const sendSms = await fetch(
+    // Send OTP via SMS
+    const smsRes = await fetch(
       `https://sms.iprogtech.com/api/v1/sms_messages?api_token=${process.env.SMS_API_TOKEN}&sms_provider=1`,
       {
         method: 'POST',
@@ -41,29 +51,23 @@ export async function registerHandler(req, res) {
       }
     );
 
-    if (!sendSms.ok) {
+    if (!smsRes.ok) {
+      console.error('SMS send failed:', await smsRes.text());
       return res.status(500).json({ message: 'Failed to send OTP' });
     }
 
-    db.run(
-      `
-      INSERT INTO users (fullName, email, address, phone, position, password, profileImage)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-      `,
-      [fullName, email, address, phone, position, password, imageBuffer],
-      function (err) {
-        if (err) {
-          console.error('SQLite Error:', err);
-          return res.status(500).json({ message: 'Database insert error' });
-        }
-
-        return res.status(200).json({
-          message: 'User registered successfully',
-          id: this.lastID,
-          otp
-        });
-      }
+    const result = await query(
+      `INSERT INTO users (fullName, email, address, phone, position, password, profileImage)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id`,
+      [fullName, email, address, phone, position, password, imageBuffer]
     );
+
+    return res.status(200).json({
+      message: 'User registered successfully',
+      id: result.rows[0].id,
+      otp
+    });
   } catch (err) {
     console.error('Unexpected error:', err);
     return res.status(500).json({ message: 'A server error occurred', error: err.message });
