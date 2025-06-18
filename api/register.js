@@ -38,7 +38,9 @@ export async function registerHandler(req, res) {
 
   const hashedPassword = await bcrypt.hash(password, 10); // ✅ hash password
 
-  const smsRes = await fetch(
+  console.log(`Generated OTP for ${phone}: ${otp}`);
+
+  /*const smsRes = await fetch(
     `https://sms.iprogtech.com/api/v1/sms_messages?api_token=${process.env.SMS_API_TOKEN}&sms_provider=1`,
     {
       method: 'POST',
@@ -53,7 +55,7 @@ export async function registerHandler(req, res) {
   if (!smsRes.ok) {
     console.error('SMS send failed:', await smsRes.text());
     return res.status(500).json({ message: 'Failed to send OTP' });
-  }
+  }*/
 
   const insertResult = await query(
     `
