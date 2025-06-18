@@ -1,6 +1,6 @@
 // routes/register.js
 import { query } from '../lib/db.js';
-// import fetch from 'node-fetch'; // Uncomment if you want to enable real SMS sending later
+import fetch from 'node-fetch'; // Uncomment if you want to enable real SMS sending later
 
 export async function registerHandler(req, res) {
   // CORS headers
@@ -46,9 +46,9 @@ export async function registerHandler(req, res) {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
   // Log the OTP for testing
-  console.log(`Generated OTP for ${phone}: ${otp}`);
+  //console.log(`Generated OTP for ${phone}: ${otp}`);
 
-  /* If you want to enable SMS sending later, uncomment:
+  // If you want to enable SMS sending later, uncomment:
   const smsRes = await fetch(
     `https://sms.iprogtech.com/api/v1/sms_messages?api_token=${process.env.SMS_API_TOKEN}&sms_provider=1`,
     {
@@ -64,7 +64,6 @@ export async function registerHandler(req, res) {
     console.error('SMS send failed:', await smsRes.text());
     return res.status(500).json({ message: 'Failed to send OTP' });
   }
-  */
 
   // 3️⃣ Insert user record including the OTP
   const insertResult = await query(
