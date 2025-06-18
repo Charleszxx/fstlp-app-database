@@ -9,6 +9,7 @@ import loginHandler from './api/login.js';
 import verifyOtpHandler from './api/verify-otp.js';
 import profileImageHandler from './api/profile-image.js';
 import getUsersHandler from './api/users.js';
+import deleteUserHandler from './api/delete-user.js';
 import { initDb } from './lib/db.js';
 
 const app = express();
@@ -26,6 +27,7 @@ app.post('/api/login', loginHandler);
 app.post('/api/verify-otp', verifyOtpHandler);
 app.get('/api/profile-image/:id', profileImageHandler);
 app.get('/api/users', getUsersHandler);
+app.get('/api/delete-user', deleteUserHandler);
 
 // Initialize DB & start
 initDb().then(() => {
