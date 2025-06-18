@@ -1,5 +1,6 @@
 // api/login.js
 import { query } from '../lib/db.js';
+import bcrypt from 'bcrypt'; // ✅ added
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -10,10 +11,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ message: 'Only POST allowed' });
 
   const { email, password } = req.body || {};
-  console.log('🔐 Login attempt:', { email, password });
+  console.log('🔐 Login attempt:', { email });
 
   if (!email || !password) {
-    console.warn('🚨 Missing email or password');
     return res.status(400).json({ message: 'Missing email or password' });
   }
 
@@ -25,25 +25,17 @@ export default async function handler(req, res) {
       [normalizedEmail]
     );
 
-    console.log('📦 DB query result:', result.rows);
-
     const user = result.rows[0];
     if (!user) {
-      console.warn('❌ No user found for email:', normalizedEmail);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    console.log('🕵️ Stored password:', user.password);
-    console.log('🕵️ Supplied password:', password);
-
-    if (user.password !== password) {
-      console.warn('❌ Password mismatch');
+    const passwordMatch = await bcrypt.compare(password, user.password); // ✅ compare hash
+    if (!passwordMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Remove password before sending response
-    delete user.password;
-
+    delete user.password; // remove before sending
     return res.status(200).json({ message: 'Login successful', user });
   } catch (err) {
     console.error('Login error:', err);
