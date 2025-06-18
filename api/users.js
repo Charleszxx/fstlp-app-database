@@ -17,7 +17,7 @@ export default async function handler(req, res) {
 
   try {
     const result = await query(`
-      SELECT id,  "fullName" AS "fullName", email, phone, position, address
+      SELECT id,  fullName AS "fullName", email, phone, position, address
       FROM users
       ORDER BY id DESC
     `);
