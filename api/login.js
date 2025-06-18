@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   try {
     const normalizedEmail = email.trim().toLowerCase();
     const result = await query(
-      `SELECT id, fullName, email, address, phone, position, password
+      `SELECT id, fullname AS "fullName", email, address, phone, position, password
        FROM users WHERE email = $1`,
       [normalizedEmail]
     );
