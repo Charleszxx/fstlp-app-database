@@ -7,6 +7,7 @@ dotenv.config();
 import { registerHandler } from './api/register.js';
 import loginHandler from './api/login.js';
 import { initDb } from './lib/db.js'; // ✅ Import initDb
+import verifyOtpHandler from './api/verify-otp.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,6 +16,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public')); // Serves index.html and static files
+app.post('/api/verify-otp', verifyOtpHandler);
 
 // Routes
 app.post('/api/register', registerHandler);
