@@ -27,7 +27,7 @@ app.post('/api/login', loginHandler);
 app.post('/api/verify-otp', verifyOtpHandler);
 app.get('/api/profile-image/:id', profileImageHandler);
 app.get('/api/users', getUsersHandler);
-app.get('/api/delete-user', deleteUserHandler);
+app.delete('/api/delete-user', deleteUserHandler);
 
 // Initialize DB & start
 initDb().then(() => {
