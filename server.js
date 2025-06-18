@@ -8,6 +8,7 @@ import { registerHandler } from './api/register.js';
 import loginHandler from './api/login.js';
 import verifyOtpHandler from './api/verify-otp.js';
 import profileImageHandler from './api/profile-image.js';
+import getUsersHandler from './api/users.js';
 import { initDb } from './lib/db.js';
 
 const app = express();
@@ -24,6 +25,7 @@ app.post('/api/register', registerHandler);
 app.post('/api/login', loginHandler);
 app.post('/api/verify-otp', verifyOtpHandler);
 app.get('/api/profile-image/:id', profileImageHandler);
+app.get('/api/users', getUsersHandler);
 
 // Initialize DB & start
 initDb().then(() => {
