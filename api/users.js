@@ -1,5 +1,5 @@
 // api/users.js
-import { query } from '../../lib/db.js';
+import { query } from '../lib/db.js';
 
 export default async function handler(req, res) {
   // CORS headers
