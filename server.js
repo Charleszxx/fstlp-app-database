@@ -7,6 +7,7 @@ dotenv.config();
 import { registerHandler } from './api/register.js';
 import loginHandler from './api/login.js';
 import verifyOtpHandler from './api/verify-otp.js';
+import profileImageHandler from './api/profile-image.js'; // ✅ Add this
 import { initDb } from './lib/db.js';
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(express.static('public'));
 app.post('/api/register', registerHandler);
 app.post('/api/login', loginHandler);
 app.post('/api/verify-otp', verifyOtpHandler);
+app.get('/api/profile-image/:id', profileImageHandler);
 
 // Initialize DB & start
 initDb().then(() => {
