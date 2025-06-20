@@ -73,8 +73,6 @@ app.delete('/api/delete-user', deleteUserHandler);
 app.post('/api/add-announcement', addAnnouncementHandler);
 app.get('/api/announcements', getAnnouncementsHandler);
 app.get('/api/quote', getQuoteHandler);
-app.get('/api/maintenance', maintenanceHandler);
-app.post('/api/maintenance', maintenanceHandler);
 
 // GET maintenance status
 app.get('/api/maintenance', (req, res) => {
