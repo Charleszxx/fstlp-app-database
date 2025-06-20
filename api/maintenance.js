@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const maintenanceFile = path.resolve('maintenance.json');
+const maintenanceFile = path.join(process.cwd(), 'maintenance.json');
 
 export default function maintenanceHandler(req, res) {
   if (req.method === 'GET') {
