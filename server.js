@@ -75,23 +75,7 @@ app.delete('/api/delete-user', deleteUserHandler);
 app.post('/api/add-announcement', addAnnouncementHandler);
 app.get('/api/announcements', getAnnouncementsHandler);
 app.get('/api/quote', getQuoteHandler);
-
-// GET maintenance status
-app.get('/api/maintenance', (req, res) => {
-  fs.readFile(maintenanceFile, 'utf8', (err, data) => {
-    if (err) return res.status(500).json({ error: 'Cannot read maintenance status' });
-    res.json(JSON.parse(data));
-  });
-});
-
-// SET maintenance status
-app.post('/api/maintenance', (req, res) => {
-  const { enabled } = req.body;
-  fs.writeFile(maintenanceFile, JSON.stringify({ enabled }), err => {
-    if (err) return res.status(500).json({ error: 'Cannot update maintenance status' });
-    res.json({ success: true });
-  });
-});
+app.all('/api/maintenance', maintenanceHandler);
 
 // Init DB and start server
 initDb().then(() => {
