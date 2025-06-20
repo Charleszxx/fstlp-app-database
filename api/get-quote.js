@@ -1,5 +1,3 @@
-import fetch from 'node-fetch'; // Only needed if you're using Node.js < 18
-
 export default async function getQuoteHandler(req, res) {
   try {
     const response = await fetch('https://api.quotable.io/quotes/random');
