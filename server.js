@@ -67,6 +67,27 @@ app.use(async (req, res, next) => {
 // Serve static files (HTML, JS, CSS, etc.)
 app.use(express.static(__dirname));
 
+// Maintenance mode check for protected HTML pages
+protectedPages.forEach(page => {
+  app.get(`/${page}`, async (req, res, next) => {
+    try {
+      const result = await query(`SELECT value FROM settings WHERE key = $1`, ['maintenance']);
+      const enabled = result.rows[0]?.value === 'true';
+
+      if (enabled) {
+        return res.sendFile(path.join(__dirname, 'maintainance.html'));
+      }
+
+      // If not in maintenance, serve the actual page
+      return res.sendFile(path.join(__dirname, page));
+    } catch (err) {
+      console.error('Maintenance middleware error:', err);
+      next(); // fallback to static
+    }
+  });
+});
+
+
 // API routes
 app.post('/api/register', registerHandler);
 app.post('/api/login', loginHandler);
