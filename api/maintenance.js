@@ -1,27 +1,26 @@
-import { getDb } from '../lib/db.js';
+import { query } from '../lib/db.js';
 
-export default async function maintenanceHandler(req, res) {
-  const db = getDb();
-
+export default async function handler(req, res) {
   if (req.method === 'GET') {
-    db.get(`SELECT value FROM settings WHERE key = 'maintenance'`, (err, row) => {
-      if (err) return res.status(500).json({ error: 'Failed to read setting' });
-      res.json({ enabled: row?.value === 'true' });
-    });
+    try {
+      const result = await query(`SELECT value FROM settings WHERE key = $1`, ['maintenance']);
+      const value = result.rows[0]?.value === 'true';
+      res.json({ enabled: value });
+    } catch (err) {
+      console.error('Error fetching maintenance status:', err);
+      res.status(500).json({ error: 'Failed to fetch maintenance status' });
+    }
   }
 
   else if (req.method === 'POST') {
     const { enabled } = req.body;
-    if (typeof enabled !== 'boolean')
+
+    if (typeof enabled !== 'boolean') {
       return res.status(400).json({ error: 'enabled must be a boolean' });
+    }
 
-    db.run(`UPDATE settings SET value = ? WHERE key = 'maintenance'`, [enabled.toString()], err => {
-      if (err) return res.status(500).json({ error: 'Failed to update setting' });
+    try {
+      await query(`UPDATE settings SET value = $1 WHERE key = $2`, [enabled.toString(), 'maintenance']);
       res.json({ success: true, enabled });
-    });
-  }
-
-  else {
-    res.status(405).json({ error: 'Method not allowed' });
-  }
-}
+    } catch (err) {
+      co
