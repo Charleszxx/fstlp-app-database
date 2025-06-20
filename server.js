@@ -4,6 +4,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
 
@@ -24,6 +26,7 @@ const PORT = process.env.PORT || 3000;
 // Required for __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const maintenanceFile = path.join(__dirname, 'maintenance.json');
 
 // Middleware
 app.use(cors());
@@ -42,7 +45,13 @@ const protectedPages = [
 
 // Maintenance mode middleware for specific HTML files
 app.use((req, res, next) => {
-  if (process.env.MAINTENANCE === 'true') {
+  let maintenanceStatus = false;
+  try {
+    const statusData = JSON.parse(fs.readFileSync(maintenanceFile, 'utf8'));
+    maintenanceStatus = statusData.enabled;
+  } catch {}
+  
+  if (maintenanceStatus) {
     const requestedFile = req.url.split('?')[0].split('/').pop();
     if (protectedPages.includes(requestedFile)) {
       return res.sendFile(path.join(__dirname, 'maintainance.html'));
@@ -64,6 +73,23 @@ app.delete('/api/delete-user', deleteUserHandler);
 app.post('/api/add-announcement', addAnnouncementHandler);
 app.get('/api/announcements', getAnnouncementsHandler);
 app.get('/api/quote', getQuoteHandler);
+
+// GET maintenance status
+app.get('/api/maintenance', (req, res) => {
+  fs.readFile(maintenanceFile, 'utf8', (err, data) => {
+    if (err) return res.status(500).json({ error: 'Cannot read maintenance status' });
+    res.json(JSON.parse(data));
+  });
+});
+
+// SET maintenance status
+app.post('/api/maintenance', (req, res) => {
+  const { enabled } = req.body;
+  fs.writeFile(maintenanceFile, JSON.stringify({ enabled }), err => {
+    if (err) return res.status(500).json({ error: 'Cannot update maintenance status' });
+    res.json({ success: true });
+  });
+});
 
 // Init DB and start server
 initDb().then(() => {
