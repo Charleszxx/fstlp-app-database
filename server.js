@@ -46,17 +46,19 @@ const protectedPages = [
 // Maintenance mode middleware for specific HTML files
 app.use((req, res, next) => {
   let maintenanceStatus = false;
+
   try {
     const statusData = JSON.parse(fs.readFileSync(maintenanceFile, 'utf8'));
     maintenanceStatus = statusData.enabled;
-  } catch {}
-  
-  if (maintenanceStatus) {
-    const requestedFile = req.url.split('?')[0].split('/').pop();
-    if (protectedPages.includes(requestedFile)) {
-      return res.sendFile(path.join(__dirname, 'maintainance.html'));
-    }
+  } catch (err) {
+    maintenanceStatus = process.env.MAINTENANCE_MODE === 'true'; // fallback
   }
+
+  const requestedFile = req.url.split('?')[0].split('/').pop();
+  if (maintenanceStatus && protectedPages.includes(requestedFile)) {
+    return res.sendFile(path.join(__dirname, 'maintainance.html'));
+  }
+
   next();
 });
 
