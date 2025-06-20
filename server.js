@@ -12,6 +12,7 @@ import getUsersHandler from './api/users.js';
 import deleteUserHandler from './api/delete-user.js';
 import addAnnouncementHandler from './api/add-announcement.js';
 import getAnnouncementsHandler from './api/get-announcements.js';
+import getQuoteHandler from './api/get-quote.js';
 import { initDb } from './lib/db.js';
 
 const app = express();
@@ -31,7 +32,7 @@ app.get('/api/users', getUsersHandler);
 app.delete('/api/delete-user', deleteUserHandler);
 app.post('/api/add-announcement', addAnnouncementHandler);
 app.get('/api/announcements', getAnnouncementsHandler);
-
+app.get('/api/quote', getQuoteHandler);
 
 // Initialize DB & start
 initDb().then(() => {
