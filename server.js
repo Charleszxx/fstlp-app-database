@@ -45,10 +45,9 @@ const protectedPages = [
 
 // Maintenance mode middleware for specific HTML files
 app.use(async (req, res, next) => {
-  const db = getDb();
-
-  db.get(`SELECT value FROM settings WHERE key = 'maintenance'`, (err, row) => {
-    const enabled = row?.value === 'true';
+  try {
+    const result = await query(`SELECT value FROM settings WHERE key = $1`, ['maintenance']);
+    const enabled = result.rows[0]?.value === 'true';
 
     const requestedFile = req.url.split('?')[0].split('/').pop();
     const isProtected = protectedPages.includes(requestedFile);
@@ -58,7 +57,10 @@ app.use(async (req, res, next) => {
     }
 
     next();
-  });
+  } catch (err) {
+    console.error('Maintenance middleware error:', err);
+    next(); // Don't block if DB fails
+  }
 });
 
 // Serve static files (HTML, JS, CSS, etc.)
