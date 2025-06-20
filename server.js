@@ -19,6 +19,7 @@ import getAnnouncementsHandler from './api/get-announcements.js';
 import getQuoteHandler from './api/get-quote.js';
 import maintenanceHandler from './api/maintenance.js';
 import { initDb } from './lib/db.js';
+import { query } from './lib/db.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
