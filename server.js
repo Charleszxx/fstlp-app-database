@@ -54,8 +54,9 @@ app.use(async (req, res, next) => {
     const isProtected = protectedPages.includes(requestedFile);
 
     if (enabled && isProtected) {
-      return res.sendFile(path.join(__dirname, 'maintainance.html'));
+      return res.redirect('https://fstlp-app.netlify.app/maintainance.html');
     }
+
 
     next();
   } catch (err) {
