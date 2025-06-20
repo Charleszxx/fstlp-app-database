@@ -1,26 +1,16 @@
-// api/maintenance.js
 import fs from 'fs';
 import path from 'path';
-import dotenv from 'dotenv';
 
-const envPath = path.resolve('.env');
-dotenv.config({ path: envPath });
+const maintenanceFile = path.resolve('maintenance.json');
 
-// Read current .env content
-function readEnv() {
-  return fs.readFileSync(envPath, 'utf-8');
-}
-
-// Write updated content to .env
-function writeEnv(content) {
-  fs.writeFileSync(envPath, content, 'utf-8');
-}
-
-// Express-style handler
 export default function maintenanceHandler(req, res) {
   if (req.method === 'GET') {
-    const isEnabled = process.env.MAINTENANCE_MODE === 'true';
-    return res.json({ enabled: isEnabled });
+    try {
+      const statusData = JSON.parse(fs.readFileSync(maintenanceFile, 'utf8'));
+      return res.json({ enabled: statusData.enabled });
+    } catch (err) {
+      return res.json({ enabled: false });
+    }
   }
 
   if (req.method === 'POST') {
@@ -30,16 +20,11 @@ export default function maintenanceHandler(req, res) {
       return res.status(400).json({ error: 'enabled must be a boolean' });
     }
 
-    const envContent = readEnv();
-    const updated = envContent.replace(/MAINTENANCE_MODE=(true|false)/, `MAINTENANCE_MODE=${enabled}`);
-
-    writeEnv(updated);
-
-    // Update in-memory value too
-    process.env.MAINTENANCE_MODE = String(enabled);
-
-    return res.json({ success: true, enabled });
+    fs.writeFile(maintenanceFile, JSON.stringify({ enabled }), err => {
+      if (err) return res.status(500).json({ error: 'Cannot update maintenance status' });
+      return res.json({ success: true });
+    });
+  } else {
+    res.status(405).json({ error: 'Method not allowed' });
   }
-
-  res.status(405).json({ error: 'Method not allowed' });
 }
