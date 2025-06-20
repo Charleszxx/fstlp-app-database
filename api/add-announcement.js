@@ -18,3 +18,4 @@ export default async function addAnnouncementHandler(req, res) {
     res.status(500).json({ error: 'Internal server error.' });
   }
 }
+s
