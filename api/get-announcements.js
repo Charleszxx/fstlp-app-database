@@ -8,9 +8,11 @@ export default async function getAnnouncementsHandler(req, res) {
     // Fetch only active announcements
     const result = await query(`
       SELECT * FROM announcements 
-      WHERE startDate <= NOW() AND endDate > NOW()
+      WHERE startDate <= NOW() AT TIME ZONE 'Asia/Manila' 
+        AND endDate > NOW() AT TIME ZONE 'Asia/Manila'
       ORDER BY createdAt DESC
     `);
+
 
     res.status(200).json(result.rows);
   } catch (err) {
