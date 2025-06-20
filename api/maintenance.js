@@ -23,4 +23,12 @@ export default async function handler(req, res) {
       await query(`UPDATE settings SET value = $1 WHERE key = $2`, [enabled.toString(), 'maintenance']);
       res.json({ success: true, enabled });
     } catch (err) {
-      co
+      console.error('Error updating maintenance status:', err);
+      res.status(500).json({ error: 'Failed to update maintenance status' });
+    }
+  }
+
+  else {
+    res.status(405).json({ error: 'Method not allowed' });
+  }
+}
