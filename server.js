@@ -44,22 +44,21 @@ const protectedPages = [
 ];
 
 // Maintenance mode middleware for specific HTML files
-app.use((req, res, next) => {
-  let maintenanceStatus = false;
+app.use(async (req, res, next) => {
+  const db = getDb();
 
-  try {
-    const statusData = JSON.parse(fs.readFileSync(maintenanceFile, 'utf8'));
-    maintenanceStatus = statusData.enabled;
-  } catch (err) {
-    maintenanceStatus = process.env.MAINTENANCE_MODE === 'true'; // fallback
-  }
+  db.get(`SELECT value FROM settings WHERE key = 'maintenance'`, (err, row) => {
+    const enabled = row?.value === 'true';
 
-  const requestedFile = req.url.split('?')[0].split('/').pop();
-  if (maintenanceStatus && protectedPages.includes(requestedFile)) {
-    return res.sendFile(path.join(__dirname, 'maintainance.html'));
-  }
+    const requestedFile = req.url.split('?')[0].split('/').pop();
+    const isProtected = protectedPages.includes(requestedFile);
 
-  next();
+    if (enabled && isProtected) {
+      return res.sendFile(path.join(__dirname, 'maintainance.html'));
+    }
+
+    next();
+  });
 });
 
 // Serve static files (HTML, JS, CSS, etc.)
