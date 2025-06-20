@@ -5,14 +5,13 @@ export default async function getAnnouncementsHandler(req, res) {
     // Delete expired announcements
     await query(`DELETE FROM announcements WHERE endDate <= NOW()`);
 
-    // Fetch only active announcements
+    // Fetch only active announcements (in Manila time)
     const result = await query(`
       SELECT * FROM announcements 
-      WHERE startDate <= NOW() AT TIME ZONE 'Asia/Manila' 
-        AND endDate > NOW() AT TIME ZONE 'Asia/Manila'
+      WHERE startDate <= NOW() 
+        AND endDate > NOW()
       ORDER BY createdAt DESC
     `);
-
 
     res.status(200).json(result.rows);
   } catch (err) {
