@@ -3,7 +3,7 @@ import { query } from '../lib/db.js';
 
 export default async function addTaskHandler(req, res) {
   try {
-    const { description, assignedTo, createdBy } = req.body;
+    const { description, assignedTo, createdBy, status = 'Pending' } = req.body;
 
     if (!description || !assignedTo || !createdBy) {
       return res.status(400).json({ error: 'Missing required fields.' });
@@ -15,9 +15,9 @@ export default async function addTaskHandler(req, res) {
     }
 
     await query(`
-      INSERT INTO tasks (description, assigned_to, created_by, created_at)
-      VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
-    `, [description, parseInt(assignedTo), parseInt(createdBy)]);
+      INSERT INTO tasks (description, assigned_to, created_by, status, created_at)
+      VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
+    `, [description, parseInt(assignedTo), parseInt(createdBy), status]);
 
     res.status(200).json({ success: true, message: 'Task added successfully.' });
   } catch (err) {
