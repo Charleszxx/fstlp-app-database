@@ -60,9 +60,9 @@ export async function registerHandler(req, res) {
   const insertResult = await query(
     `
       INSERT INTO users
-        (fullName, email, address, phone, position, password, profileImage, otp, otp_verified)
+        (fullName, email, address, phone, position, password, profileImage, otp, otp_verified, role)
       VALUES
-        ($1, $2, $3, $4, $5, $6, $7, $8, false)
+        ($1, $2, $3, $4, $5, $6, $7, $8, false, 'visitor')
       RETURNING id
     `,
     [fullName, email, address, phone, position, hashedPassword, imageBuffer, otp]
