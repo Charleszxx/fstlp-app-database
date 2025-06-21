@@ -9,10 +9,15 @@ export default async function addTaskHandler(req, res) {
       return res.status(400).json({ error: 'Missing required fields.' });
     }
 
+    // Validate that IDs are numeric
+    if (isNaN(assignedTo) || isNaN(createdBy)) {
+      return res.status(400).json({ error: 'Invalid user IDs.' });
+    }
+
     await query(`
       INSERT INTO tasks (description, assigned_to, created_by, created_at)
       VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
-    `, [description, assignedTo, createdBy]);
+    `, [description, parseInt(assignedTo), parseInt(createdBy)]);
 
     res.status(200).json({ success: true, message: 'Task added successfully.' });
   } catch (err) {
