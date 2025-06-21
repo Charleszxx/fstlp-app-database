@@ -2,7 +2,21 @@ import { query } from '../lib/db.js';
 
 export default async function getTasksHandler(req, res) {
   try {
-    const result = await query(`SELECT id, description, assigned_to, created_by, created_at, status, link FROM tasks ORDER BY created_at DESC`);
+    const result = await query(`
+      SELECT 
+        tasks.id, 
+        tasks.description, 
+        tasks.assigned_to, 
+        tasks.created_by, 
+        users.name AS created_by_name,
+        tasks.created_at, 
+        tasks.status, 
+        tasks.link
+      FROM tasks
+      LEFT JOIN users ON tasks.created_by = users.id
+      ORDER BY tasks.created_at DESC
+    `);
+
     res.json({ success: true, tasks: result.rows });
   } catch (err) {
     console.error('Get Tasks Error:', err);
