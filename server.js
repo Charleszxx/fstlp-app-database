@@ -18,6 +18,7 @@ import addAnnouncementHandler from './api/add-announcement.js';
 import getAnnouncementsHandler from './api/get-announcements.js';
 import getQuoteHandler from './api/get-quote.js';
 import maintenanceHandler from './api/maintenance.js';
+import addTaskHandler from './api/add-task.js';
 import { initDb } from './lib/db.js';
 import { query } from './lib/db.js';
 
@@ -100,6 +101,7 @@ app.post('/api/add-announcement', addAnnouncementHandler);
 app.get('/api/announcements', getAnnouncementsHandler);
 app.get('/api/quote', getQuoteHandler);
 app.all('/api/maintenance', maintenanceHandler);
+app.post('/api/add-task', addTaskHandler);
 
 // Init DB and start server
 initDb().then(() => {
