@@ -8,7 +8,7 @@ export default async function getTasksHandler(req, res) {
         tasks.description, 
         tasks.assigned_to, 
         tasks.created_by, 
-        users.name AS created_by_name,
+        users.fullName AS created_by_name,
         tasks.created_at, 
         tasks.status, 
         tasks.link
