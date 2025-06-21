@@ -18,6 +18,7 @@ export default async function handler(req, res) {
     }
 
     const userId = userResult.rows[0].id;
+    const position = userResult.rows[0].position || 'Unknown';
     const eventId = eventResult.rows[0].id;
 
     await query(`
@@ -26,7 +27,7 @@ export default async function handler(req, res) {
       ON CONFLICT DO NOTHING
     `, [userId, eventId]);
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ success: true, position });
   } catch (error) {
     console.error('Error marking attendance:', error);
     res.status(500).json({ error: 'Internal server error' });
