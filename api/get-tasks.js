@@ -4,17 +4,19 @@ export default async function getTasksHandler(req, res) {
   try {
     const result = await query(`
       SELECT 
-        tasks.id, 
-        tasks.description, 
-        tasks.assigned_to, 
-        tasks.created_by, 
-        users.fullname AS created_by_name,
-        tasks.created_at, 
-        tasks.status, 
-        tasks.link
-      FROM tasks
-      LEFT JOIN users ON tasks.created_by = users.id
-      ORDER BY tasks.created_at DESC
+        t.id, 
+        t.description, 
+        t.assigned_to, 
+        t.created_by, 
+        creator.fullname AS created_by_name,
+        assignee.fullname AS assigned_to_name,
+        t.created_at, 
+        t.status, 
+        t.link
+      FROM tasks t
+      LEFT JOIN users creator ON t.created_by = creator.id
+      LEFT JOIN users assignee ON t.assigned_to = assignee.id
+      ORDER BY t.created_at DESC
     `);
 
     res.json({ success: true, tasks: result.rows });
