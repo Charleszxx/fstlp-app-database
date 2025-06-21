@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const userResult = await query(`SELECT id FROM users WHERE fullName = $1`, [fullName]);
+    const userResult = await query(`SELECT id, position FROM users WHERE fullName = $1`, [fullName]);
     const eventResult = await query(`SELECT id FROM events WHERE name = $1`, [eventName]);
 
     if (!userResult.rows.length || !eventResult.rows.length) {
