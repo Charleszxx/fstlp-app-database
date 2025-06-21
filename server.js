@@ -21,6 +21,7 @@ import maintenanceHandler from './api/maintenance.js';
 import addTaskHandler from './api/add-task.js';
 import updateTaskStatusHandler from './api/update-task-status.js';
 import submitTaskHandler from './api/submit-task.js';
+import getTasksHandler from './api/get-tasks.js';
 import { initDb } from './lib/db.js';
 import { query } from './lib/db.js';
 
@@ -106,6 +107,7 @@ app.all('/api/maintenance', maintenanceHandler);
 app.post('/api/add-task', addTaskHandler);
 app.post('/api/update-task-status', updateTaskStatusHandler);
 app.post('/api/submit-task', submitTaskHandler);
+app.get('/api/tasks', getTasksHandler);
 
 // Init DB and start server
 initDb().then(() => {
