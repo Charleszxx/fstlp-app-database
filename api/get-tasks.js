@@ -1,3 +1,4 @@
+// api/get-tasks.js
 import { query } from '../lib/db.js';
 
 export default async function getTasksHandler(req, res) {
@@ -11,6 +12,7 @@ export default async function getTasksHandler(req, res) {
         creator.fullname AS created_by_name,
         assignee.fullname AS assigned_to_name,
         t.created_at, 
+        t.deadline,
         t.status, 
         t.link
       FROM tasks t
