@@ -26,6 +26,8 @@ import addEventHandler from './api/add-event.js';
 import getEventsHandler from './api/events.js';
 import markAttendanceHandler from './api/mark-attendance.js';
 import userAttendanceHandler from './api/user-attendance.js';
+import deleteTaskHandler from './api/delete-task.js';
+import deleteEventHandler from './api/delete-event.js';
 import { initDb } from './lib/db.js';
 import { query } from './lib/db.js';
 
@@ -116,6 +118,8 @@ app.post('/api/add-events', addEventHandler);
 app.get('/api/events', getEventsHandler);
 app.post('/api/mark-attendance', markAttendanceHandler);
 app.post('/api/user-attendance', userAttendanceHandler);
+app.delete('/api/delete-task', deleteTaskHandler);
+app.delete('/api/delete-event', deleteEventHandler);
 
 // Init DB and start server
 initDb().then(() => {
