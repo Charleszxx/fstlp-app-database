@@ -27,9 +27,23 @@ export async function registerHandler(req, res) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
-  const checkResult = await query(`SELECT id FROM users WHERE email = $1`, [email]);
-  if (checkResult.rowCount > 0) {
-    return res.status(409).json({ message: 'Email already registered' });
+  // Check for existing email or phone
+  const duplicateCheck = await query(
+    `SELECT email, phone FROM users WHERE email = $1 OR phone = $2`,
+    [email, phone]
+  );
+  
+  if (duplicateCheck.rows.length > 0) {
+    const taken = duplicateCheck.rows[0];
+    const emailTaken = taken.email === email;
+    const phoneTaken = taken.phone === phone;
+  
+    let message = 'Registration failed: ';
+    if (emailTaken && phoneTaken) message += 'Email and phone number are already taken';
+    else if (emailTaken) message += 'Email is already taken';
+    else message += 'Phone number is already taken';
+  
+    return res.status(409).json({ message });
   }
 
   const base64Data = profileImage.split(',')[1];
