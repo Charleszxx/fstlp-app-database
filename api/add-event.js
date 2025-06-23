@@ -13,7 +13,8 @@ export default async function handler(req, res) {
 
   try {
     const result = await query(
-      `INSERT INTO events (name, details, start_date, end_date) VALUES ($1, $2, $3, $4) RETURNING id`,
+      `INSERT INTO events (name, details, start_date, end_date)
+       VALUES ($1, $2, $3::timestamptz AT TIME ZONE 'Asia/Manila', $4::timestamptz AT TIME ZONE 'Asia/Manila') RETURNING id`,
       [eventName, eventDetails, eventStart, eventEnd]
     );
 
