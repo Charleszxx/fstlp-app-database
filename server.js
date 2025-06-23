@@ -30,6 +30,7 @@ import deleteTaskHandler from './api/delete-task.js';
 import deleteEventHandler from './api/delete-event.js';
 import editTaskHandler from './api/update-task.js';
 import editEventHandler from './api/update-event.js';
+import editAnnouncementHandler from './api/update-announcement.js';
 import getEventById from './api/get-event-by-id.js';
 import getAnnouncementById from './api/get-announcement-by-id.js';
 import { initDb } from './lib/db.js';
@@ -126,6 +127,7 @@ app.delete('/api/delete-task', deleteTaskHandler);
 app.delete('/api/delete-event', deleteEventHandler);
 app.post('/api/update-task', editTaskHandler);
 app.post('/api/update-event', editEventHandler);
+app.post('/api/update-announcement', editAnnouncementHandler);
 app.get('/api/events/:id', getEventById);
 app.get('/api/announcement', getAnnouncementById);
 
