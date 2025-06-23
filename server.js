@@ -134,7 +134,7 @@ app.post('/api/update-event', editEventHandler);
 app.post('/api/update-announcement', editAnnouncementHandler);
 app.get('/api/events/:id', getEventById);
 app.get('/api/announcement', getAnnouncementById);
-app.post('/api/delete-announcement', deleteAnnouncementById);
+app.delete('/api/delete-announcement', deleteAnnouncementById);
 app.post('/api/send-otp', sendOtpHandler);
 app.post('/api/reset-password', resetPasswordHandler);
 app.post('/api/check-phone', checkPhoneHandler);
