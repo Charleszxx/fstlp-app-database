@@ -29,6 +29,7 @@ import userAttendanceHandler from './api/user-attendance.js';
 import deleteTaskHandler from './api/delete-task.js';
 import deleteEventHandler from './api/delete-event.js';
 import editTaskHandler from './api/update-task.js';
+import editEventHandler from './api/update-event.js';
 import { initDb } from './lib/db.js';
 import { query } from './lib/db.js';
 
@@ -122,6 +123,7 @@ app.post('/api/user-attendance', userAttendanceHandler);
 app.delete('/api/delete-task', deleteTaskHandler);
 app.delete('/api/delete-event', deleteEventHandler);
 app.post('/api/update-task', editTaskHandler);
+app.post('/api/update-event', editEventHandler);
 
 // Init DB and start server
 initDb().then(() => {
