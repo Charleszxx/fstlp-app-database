@@ -35,6 +35,7 @@ import getEventById from './api/get-event-by-id.js';
 import getAnnouncementById from './api/get-announcement-by-id.js';
 import sendOtpHandler from './api/send-otp.js';
 import resetPasswordHandler from './api/reset-password.js';
+import checkPhoneHandler from './api/check-phone.js';
 import { initDb } from './lib/db.js';
 import { query } from './lib/db.js';
 
@@ -134,6 +135,7 @@ app.get('/api/events/:id', getEventById);
 app.get('/api/announcement', getAnnouncementById);
 app.post('/api/send-otp', sendOtpHandler);
 app.post('/api/reset-password', resetPasswordHandler);
+app.post('/api/check-phone', checkPhoneHandler);
 
 // Init DB and start server
 initDb().then(() => {
