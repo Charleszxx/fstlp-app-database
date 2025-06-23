@@ -15,12 +15,15 @@ export default async function handler(req, res) {
     const userId = userResult.rows[0].id;
 
     const attendanceResult = await query(`
-      SELECT events.name AS event_name FROM attendance 
+      SELECT events.id FROM attendance 
       JOIN events ON events.id = attendance.event_id 
       WHERE user_id = $1
     `, [userId]);
+    
+    const attendedEventIds = attendanceResult.rows.map(row => row.id);
+    
+    res.status(200).json({ success: true, attendedEventIds });
 
-    const attendedEvents = attendanceResult.rows.map(row => row.event_name);
 
     res.status(200).json({ success: true, attendedEvents });
   } catch (err) {
