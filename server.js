@@ -30,6 +30,7 @@ import deleteTaskHandler from './api/delete-task.js';
 import deleteEventHandler from './api/delete-event.js';
 import editTaskHandler from './api/update-task.js';
 import editEventHandler from './api/update-event.js';
+import getEventById from './api/get-event-by-id.js';
 import { initDb } from './lib/db.js';
 import { query } from './lib/db.js';
 
@@ -124,6 +125,7 @@ app.delete('/api/delete-task', deleteTaskHandler);
 app.delete('/api/delete-event', deleteEventHandler);
 app.post('/api/update-task', editTaskHandler);
 app.post('/api/update-event', editEventHandler);
+app.get('/api/events/:id', getEventById);
 
 // Init DB and start server
 initDb().then(() => {
