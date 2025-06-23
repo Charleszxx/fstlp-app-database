@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     // TODO: Integrate email sending via service like SendGrid / Mailgun
     console.log(`Send this OTP to user via email: ${otp}`);
 
-    return res.status(200).json({ success: true, message: 'OTP sent' });
+    return res.status(200).json({ success: true, message: 'OTP sent', otp }); // <-- Add `otp`
   } catch (err) {
     console.error('OTP send error:', err);
     return res.status(500).json({ message: 'Server error' });
