@@ -28,7 +28,7 @@ import markAttendanceHandler from './api/mark-attendance.js';
 import userAttendanceHandler from './api/user-attendance.js';
 import deleteTaskHandler from './api/delete-task.js';
 import deleteEventHandler from './api/delete-event.js';
-import editTaskHandler from './api/edit-task.js';
+import editTaskHandler from './api/update-task.js';
 import { initDb } from './lib/db.js';
 import { query } from './lib/db.js';
 
