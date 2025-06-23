@@ -23,9 +23,6 @@ export default async function handler(req, res) {
     const attendedEventIds = attendanceResult.rows.map(row => row.id);
     
     res.status(200).json({ success: true, attendedEventIds });
-
-
-    res.status(200).json({ success: true, attendedEvents });
   } catch (err) {
     console.error('Error fetching attendance:', err);
     res.status(500).json({ error: 'Internal server error' });
