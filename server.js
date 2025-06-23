@@ -33,7 +33,7 @@ import editEventHandler from './api/update-event.js';
 import editAnnouncementHandler from './api/update-announcement.js';
 import getEventById from './api/get-event-by-id.js';
 import getAnnouncementById from './api/get-announcement-by-id.js';
-import deleteAnnouncementById from './api/delete-announcement';
+import deleteAnnouncementById from './api/delete-announcement.js';
 import sendOtpHandler from './api/send-otp.js';
 import resetPasswordHandler from './api/reset-password.js';
 import checkPhoneHandler from './api/check-phone.js';
