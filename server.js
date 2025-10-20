@@ -84,8 +84,10 @@ app.use(async (req, res, next) => {
   }
 });
 
-// Serve static files (HTML, JS, CSS, etc.)
-app.use(express.static(__dirname));
+// Serve index.html explicitly if accessing root
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // Maintenance mode check for protected HTML pages
 protectedPages.forEach(page => {
@@ -147,3 +149,4 @@ initDb().then(() => {
   console.error('DB init error', err);
   process.exit(1);
 });
+
