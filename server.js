@@ -4,56 +4,56 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { initDb, query } from './lib/db.js';
-
-// ✅ Named imports for all API handlers
-import { registerHandler } from './api/register.js';
-import { loginHandler } from './api/login.js';
-import { verifyOtpHandler } from './api/verify-otp.js';
-import { profileImageHandler } from './api/profile-image.js';
-import { getUsersHandler } from './api/users.js';
-import { deleteUserHandler } from './api/delete-user.js';
-import { addAnnouncementHandler } from './api/add-announcement.js';
-import { getAnnouncementsHandler } from './api/get-announcements.js';
-import { getQuoteHandler } from './api/get-quote.js';
-import { maintenanceHandler } from './api/maintenance.js';
-import { addTaskHandler } from './api/add-task.js';
-import { updateTaskStatusHandler } from './api/update-task-status.js';
-import { submitTaskHandler } from './api/submit-task.js';
-import { getTasksHandler } from './api/get-tasks.js';
-import { addEventHandler } from './api/add-event.js';
-import { getEventsHandler } from './api/events.js';
-import { markAttendanceHandler } from './api/mark-attendance.js';
-import { userAttendanceHandler } from './api/user-attendance.js';
-import { deleteTaskHandler } from './api/delete-task.js';
-import { deleteEventHandler } from './api/delete-event.js';
-import { editTaskHandler } from './api/update-task.js';
-import { editEventHandler } from './api/update-event.js';
-import { editAnnouncementHandler } from './api/update-announcement.js';
-import { getEventById } from './api/get-event-by-id.js';
-import { getAnnouncementById } from './api/get-announcement-by-id.js';
-import { deleteAnnouncementById } from './api/delete-announcement.js';
-import { sendOtpHandler } from './api/send-otp.js';
-import { resetPasswordHandler } from './api/reset-password.js';
-import { checkPhoneHandler } from './api/check-phone.js';
+import fs from 'fs';
 
 dotenv.config();
+
+import { registerHandler } from './api/register.js';
+import loginHandler from './api/login.js';
+import verifyOtpHandler from './api/verify-otp.js';
+import profileImageHandler from './api/profile-image.js';
+import getUsersHandler from './api/users.js';
+import deleteUserHandler from './api/delete-user.js';
+import addAnnouncementHandler from './api/add-announcement.js';
+import getAnnouncementsHandler from './api/get-announcements.js';
+import getQuoteHandler from './api/get-quote.js';
+import maintenanceHandler from './api/maintenance.js';
+import addTaskHandler from './api/add-task.js';
+import updateTaskStatusHandler from './api/update-task-status.js';
+import submitTaskHandler from './api/submit-task.js';
+import getTasksHandler from './api/get-tasks.js';
+import addEventHandler from './api/add-event.js';
+import getEventsHandler from './api/events.js';
+import markAttendanceHandler from './api/mark-attendance.js';
+import userAttendanceHandler from './api/user-attendance.js';
+import deleteTaskHandler from './api/delete-task.js';
+import deleteEventHandler from './api/delete-event.js';
+import editTaskHandler from './api/update-task.js';
+import editEventHandler from './api/update-event.js';
+import editAnnouncementHandler from './api/update-announcement.js';
+import getEventById from './api/get-event-by-id.js';
+import getAnnouncementById from './api/get-announcement-by-id.js';
+import deleteAnnouncementById from './api/delete-announcement.js';
+import sendOtpHandler from './api/send-otp.js';
+import resetPasswordHandler from './api/reset-password.js';
+import checkPhoneHandler from './api/check-phone.js';
+import { initDb } from './lib/db.js';
+import { query } from './lib/db.js';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Required for __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const maintenanceFile = path.join(__dirname, 'maintenance.json');
 
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-// Serve all static files from "public" folder
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Pages affected by maintenance mode
+// List of pages affected by maintenance mode
 const protectedPages = [
   'apply.html',
   'dashboard.html',
@@ -63,29 +63,50 @@ const protectedPages = [
   'register.html'
 ];
 
-// Maintenance middleware
+// Maintenance mode middleware for specific HTML files
 app.use(async (req, res, next) => {
   try {
-    const requestedFile = req.url.split('?')[0].split('/').pop();
-    if (!protectedPages.includes(requestedFile)) return next();
-
     const result = await query(`SELECT value FROM settings WHERE key = $1`, ['maintenance']);
-    const maintenanceEnabled = result.rows[0]?.value === 'true';
+    const enabled = result.rows[0]?.value === 'true';
 
-    if (maintenanceEnabled) {
-      return res.sendFile(path.join(__dirname, 'public', 'maintainance.html'));
+    const requestedFile = req.url.split('?')[0].split('/').pop();
+    const isProtected = protectedPages.includes(requestedFile);
+
+    if (enabled && isProtected) {
+      return res.redirect('https://fstlp-app.netlify.app/maintainance.html');
     }
+
+
     next();
   } catch (err) {
     console.error('Maintenance middleware error:', err);
-    next();
+    next(); // Don't block if DB fails
   }
 });
 
-// Explicit root route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Serve static files (HTML, JS, CSS, etc.)
+app.use(express.static(__dirname));
+
+// Maintenance mode check for protected HTML pages
+protectedPages.forEach(page => {
+  app.get(`/${page}`, async (req, res, next) => {
+    try {
+      const result = await query(`SELECT value FROM settings WHERE key = $1`, ['maintenance']);
+      const enabled = result.rows[0]?.value === 'true';
+
+      if (enabled) {
+        return res.sendFile(path.join(__dirname, 'maintainance.html'));
+      }
+
+      // If not in maintenance, serve the actual page
+      return res.sendFile(path.join(__dirname, page));
+    } catch (err) {
+      console.error('Maintenance middleware error:', err);
+      next(); // fallback to static
+    }
+  });
 });
+
 
 // API routes
 app.post('/api/register', registerHandler);
@@ -118,13 +139,11 @@ app.post('/api/send-otp', sendOtpHandler);
 app.post('/api/reset-password', resetPasswordHandler);
 app.post('/api/check-phone', checkPhoneHandler);
 
-// Start server after DB init
-initDb()
-  .then(() => {
-    console.log('✅ Database initialized');
-    app.listen(PORT, () => console.log(`🚀 Listening on port ${PORT}`));
-  })
-  .catch(err => {
-    console.error('DB init error', err);
-    process.exit(1);
-  });
+// Init DB and start server
+initDb().then(() => {
+  console.log('✅ Database initialized');
+  app.listen(PORT, () => console.log(`🚀 Listening on port ${PORT}`));
+}).catch(err => {
+  console.error('DB init error', err);
+  process.exit(1);
+});
