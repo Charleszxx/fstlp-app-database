@@ -4,11 +4,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
+import { initDb, query } from './lib/db.js';
 
-dotenv.config();
-
-import { registerHandler } from './api/register.js';
+import registerHandler from './api/register.js';
 import loginHandler from './api/login.js';
 import verifyOtpHandler from './api/verify-otp.js';
 import profileImageHandler from './api/profile-image.js';
@@ -37,23 +35,24 @@ import deleteAnnouncementById from './api/delete-announcement.js';
 import sendOtpHandler from './api/send-otp.js';
 import resetPasswordHandler from './api/reset-password.js';
 import checkPhoneHandler from './api/check-phone.js';
-import { initDb } from './lib/db.js';
-import { query } from './lib/db.js';
 
+dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Required for __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const maintenanceFile = path.join(__dirname, 'maintenance.json');
 
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-// List of pages affected by maintenance mode
+// Serve all static files from "public" folder
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Pages affected by maintenance mode
 const protectedPages = [
   'apply.html',
   'dashboard.html',
@@ -63,52 +62,29 @@ const protectedPages = [
   'register.html'
 ];
 
-// Maintenance mode middleware for specific HTML files
+// Maintenance middleware
 app.use(async (req, res, next) => {
   try {
-    const result = await query(`SELECT value FROM settings WHERE key = $1`, ['maintenance']);
-    const enabled = result.rows[0]?.value === 'true';
-
     const requestedFile = req.url.split('?')[0].split('/').pop();
-    const isProtected = protectedPages.includes(requestedFile);
+    if (!protectedPages.includes(requestedFile)) return next();
 
-    if (enabled && isProtected) {
-      return res.redirect('https://fstlp-app.netlify.app/maintainance.html');
+    const result = await query(`SELECT value FROM settings WHERE key = $1`, ['maintenance']);
+    const maintenanceEnabled = result.rows[0]?.value === 'true';
+
+    if (maintenanceEnabled) {
+      return res.sendFile(path.join(__dirname, 'public', 'maintainance.html'));
     }
-
-
     next();
   } catch (err) {
     console.error('Maintenance middleware error:', err);
-    next(); // Don't block if DB fails
+    next();
   }
 });
 
-// Serve index.html explicitly if accessing root
+// Explicit root route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-// Maintenance mode check for protected HTML pages
-protectedPages.forEach(page => {
-  app.get(`/${page}`, async (req, res, next) => {
-    try {
-      const result = await query(`SELECT value FROM settings WHERE key = $1`, ['maintenance']);
-      const enabled = result.rows[0]?.value === 'true';
-
-      if (enabled) {
-        return res.sendFile(path.join(__dirname, 'maintainance.html'));
-      }
-
-      // If not in maintenance, serve the actual page
-      return res.sendFile(path.join(__dirname, page));
-    } catch (err) {
-      console.error('Maintenance middleware error:', err);
-      next(); // fallback to static
-    }
-  });
-});
-
 
 // API routes
 app.post('/api/register', registerHandler);
@@ -141,12 +117,13 @@ app.post('/api/send-otp', sendOtpHandler);
 app.post('/api/reset-password', resetPasswordHandler);
 app.post('/api/check-phone', checkPhoneHandler);
 
-// Init DB and start server
-initDb().then(() => {
-  console.log('✅ Database initialized');
-  app.listen(PORT, () => console.log(`🚀 Listening on port ${PORT}`));
-}).catch(err => {
-  console.error('DB init error', err);
-  process.exit(1);
-});
-
+// Start server after DB init
+initDb()
+  .then(() => {
+    console.log('✅ Database initialized');
+    app.listen(PORT, () => console.log(`🚀 Listening on port ${PORT}`));
+  })
+  .catch(err => {
+    console.error('DB init error', err);
+    process.exit(1);
+  });
